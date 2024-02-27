@@ -1,0 +1,82 @@
+TOP:
+```sql
+
+
+ +-----------------------------------------------------------+
+   |                        User                               |
+   +-----------------------------------------------------------+
+                   |
+                   | HTTP Request
+                   |
+   +-----------------------------------------------------------+
+   |                      Internet                             |
+   +-----------------------------------------------------------+
+                   |
+                   | DNS Resolution
+                   |
+   +-----------------------------------------------------------+
+   |                       DNS Servers                         |
+   |                                                           |
+   |   +-----------------------+                               |
+   |   |   foobar.com          |                               |
+   |   |   (Authoritative)     |                               |
+   |   |                       |                               |
+   |   |   www.foobar.com      |                               |
+   |   |   (A Record: IP)      |                               |
+   |   +-----------------------+                               |
+   +-----------------------------------------------------------+
+                   |
+                   | HTTP Request
+                   |
+   +-----------------------------------------------------------+
+   |                    Firewall                               |
+   | (Protecting from malicious traffic)                       |
+   +-----------------------------------------------------------+
+                   |
+                   | HTTP Request
+                   |
+   +-----------------------------------------------------------+
+   |                    Load Balancer 1                        |
+   | (HAproxy with Round Robin distribution algorithm)         |
+   |   +-----------------------+   +----------------------+   +-------------------+
+   |   |      Web Server 1     |   |    Application &     |   |     Database 1    |
+   |   |       (Nginx)         |   |    Database Server   |   |      (MySQL)      |
+   |   |       Firewall        |   |       Firewall       |   |       Firewall    |
+   |   +-----------------------+   +----------------------+   +-------------------+
+   |   +-----------------------+   +----------------------+   +-------------------+
+   |   |      Web Server 2     |   |    Application &     |   |     Database 2    |
+   |   |       (Nginx)         |   |    Database Server   |   |      (MySQL)      |
+   |   |       Firewall        |   |       Firewall       |   |       Firewall    |
+   |   +-----------------------+   +----------------------+   +-------------------+
+   |                   |                                        |
+   |                   |                                        |
+   +-----------------------------------------------------------+
+                   |
+                   | HTTP Request
+                   |
+   +-----------------------------------------------------------+
+   |                    Load Balancer 2                        |
+   | (HAproxy with Round Robin distribution algorithm)         |
+   +-----------------------------------------------------------+
+   |                   Web Server                               |
+   |       (Nginx, Firewall)                                   |
+   +-----------------------------------------------------------+
+   |                 Application Server                        |
+   |               (Application & Firewall)                    |
+   +-----------------------------------------------------------+
+   |                   Database Server                         |
+   |                    (MySQL, Firewall)                      |
+   +-----------------------------------------------------------+
+
+
+```
+In order to configure a cluster for high availability,
+Load Balancer 2 should be connected to Load Balancer 1.
+This setup ensures redundancy and fault tolerance in the load
+balancing mechanism. By connecting Load Balancer 2 to
+Load Balancer 1, we create a cluster where both load balancers work
+together to distribute traffic effectively. If one load balancer
+fails, the other can seamlessly take over, ensuring uninterrupted
+service. This configuration enhances the reliability and
+availability of the infrastructure, providing a robust solution for
+handling incoming requests.
