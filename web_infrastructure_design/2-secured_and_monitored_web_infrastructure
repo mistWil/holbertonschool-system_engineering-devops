@@ -1,0 +1,90 @@
+```sql
+   +-----------------------------------------------------------+
+   |                        User                               |
+   +-----------------------------------------------------------+
+                   |
+                   | HTTP Request
+                   |
+   +-----------------------------------------------------------+
+   |                      Internet                             |
+   +-----------------------------------------------------------+
+                   |
+                   | DNS Resolution
+                   |
+   +-----------------------------------------------------------+
+   |                       DNS Servers                         |
+   |                                                           |
+   |   +-----------------------+                               |
+   |   |   foobar.com          |                               |
+   |   |   (Authoritative)     |                               |
+   |   |                       |                               |
+   |   |   www.foobar.com      |                               |
+   |   |   (A Record: IP)      |                               |
+   |   +-----------------------+                               |
+   +-----------------------------------------------------------+
+                   |
+                   | HTTP Request
+                   |
+   +-----------------------------------------------------------+
+   |                    Firewall                               |
+   |         (Protecting from malicious traffic)               |
+   +-----------------------------------------------------------+
+                   |
+                   | HTTP Request
+                   |
+    +-----------------------------------------------------------+
+   |                    Load Balancer                          |
+   |     (HAproxy with Round Robin distribution algorithm)     |
+   |                   Active - Passive                        |
+   +-----------------------------------------------------------+
+                        ^   |      ^  |
+                        |   |      |  | HTTP Request (distributed by Load Balancer)
+                        |   |      |  |
+                        |   |      |  |                                          +------------------------------------------------------------------------------+
+                        |   |      |  |                                          |                                   Server 1                                   |
+                        |   |      |  |                                          |                                   Primary                                    |
+                        |   |      |  |                                   |---|  |                                                                              |
+                        |   |      |  |                                   |   |  |   +-------------------+          +---------------+          +------------+   |
+                        |   |      |  |                                   |   |  |   |   Web Server 1    |<---------|  Application  |<---------|  Database  |   |
+                        |   |      |  |---------------------------------->|   |  |   |                   |          |    Server 1   |          |   (MySQL)  |<--|----|
+                        |   |      |--------------------------------------|   |  |   |      (Nginx)      |--------->|  (PHP/Python) |--------->|   Primary  |   |    |
+                        |   |                                             |   |  |   +-------------------+          +---------------+          +------------+   |    |
+                        |   |                                             |   |  |                                                                              |    | 
+                        |   |                                             |---|  +------------------------------------------------------------------------------+    | 
+                        |   |                                           Firewall                                                                                     |
+                        |   |                                                    +------------------------------------------------------------------------------+    |
+                        |   |                                                    |                                   Server 2                                   |    |
+                        |   |                                             |---|  |                                Replica/Backup                                |    |
+                        |   |                HTTP Request                 |   |  |                                                                              |    |
+                        |   |        (distributed by Load Balancer)       |   |  |   +-------------------+          +----------------+          +------------+  |    |
+                        |   |-------------------------------------------->|   |  |   |    Web Server 2   |<---------|  Application   |<---------|  Database  |  |    |
+                        |------------------------------------------------ |   |  |   |                   |          |    Server 2    |          |   (MySQL)  |<-|----|
+                                                                          |   |  |   |      (Nginx)      |--------->|  (PHP/Python)  |--------->|   Replica  |  |
+                                                                          |   |  |   +-------------------+          +----------------+          +------------+  |
+                                                                          |---|  |                                                                              |  
+                                                                        Firewall +------------------------------------------------------------------------------+
+
+
+
+   
+```
+Infrastructure Web à Trois Serveurs: Design d'une infrastructure web composée de trois serveurs pour héberger le site www.foobar.com, assurant la disponibilité et la performance des services.
+
+Sécurité: Ajout de trois pare-feux pour contrôler le trafic réseau et protéger contre les menaces extérieures.
+
+HTTPS et Certificat SSL: Utilisation d'un certificat SSL pour chiffrer le trafic HTTPS entre les clients et les serveurs, garantissant la confidentialité et l'intégrité des données.
+
+Surveillance (Monitoring): Intégration de trois clients de surveillance pour collecter des données sur la performance du système, détecter les anomalies et assurer le bon fonctionnement continu.
+
+Explications spécifiques:
+
+Raison de l'ajout de chaque élément: Les pare-feux pour la sécurité, SSL pour le chiffrement, et la surveillance pour le suivi de la performance.
+Fonction des pare-feux: Contrôler le flux de trafic réseau en fonction de règles de sécurité définies.
+Importance de HTTPS: Chiffrer le trafic pour assurer la confidentialité et l'intégrité des données.
+Objectif de la surveillance: Surveiller la performance et la disponibilité du système pour prévenir les problèmes.
+Méthode de collecte des données de surveillance: Collecter et analyser les données système pour détecter les problèmes et optimiser les performances.
+Problèmes potentiels:
+
+Risques de terminaison SSL au niveau du répartiteur de charge: Expose le trafic non chiffré à l'intérieur du réseau, compromettant la sécurité des données.
+Risques d'avoir un seul serveur MySQL acceptant les écritures: Crée un point de défaillance unique et peut entraîner une perte de données ou des temps d'arrêt.
+Problèmes liés à des serveurs identiques: Risque de pannes généralisées en raison de vulnérabilités ou de configurations similaires, limitant la scalabilité et la tolérance aux pannes.
